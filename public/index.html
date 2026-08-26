@@ -1382,6 +1382,29 @@ const palette = [
   {bg:'#f87171', text:'#2e0a0a'}, {bg:'#facc15', text:'#2e2400'},
 ];
 function fmt(n){ return n.toLocaleString('ru-RU'); }
+function getInitials(name){
+  return (name || '').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '??';
+}
+function applyProfileInfo(serverName){
+  const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
+  const displayName = (tgUser && [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '))
+    || serverName || "O'yinchi";
+  const usernameTxt = tgUser && tgUser.username ? ('@' + tgUser.username) : '';
+  const photoUrl = tgUser && tgUser.photo_url;
+
+  const nickEl = document.querySelector('.profile-hero .nick');
+  const unameEl = document.querySelector('.profile-hero .uname');
+  const avatarEl = document.querySelector('.profile-hero .avatar-lg');
+  if(nickEl) nickEl.textContent = displayName;
+  if(unameEl){ unameEl.textContent = usernameTxt; unameEl.style.display = usernameTxt ? '' : 'none'; }
+  if(avatarEl){
+    if(photoUrl){
+      avatarEl.innerHTML = `<img src="${photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="">`;
+    } else {
+      avatarEl.textContent = getInitials(displayName);
+    }
+  }
+}
 
 /* ============================================================
    AUTH — Telegram WebApp initData orqali serverga kirish
@@ -1403,17 +1426,16 @@ function authenticate(){
     isAdmin = res.user.isAdmin;
 
     document.querySelector('.tgid').textContent = `ID: ${myId}`;
+    try { applyProfileInfo(res.user.name); } catch(e){ console.error('profil ma\'lumotini yangilashda xatolik:', e); }
     updateBalanceUI();
     if(isAdmin){ document.getElementById('adminEntryBtn').style.display = 'flex'; }
 
-    wheelState = res.wheel; renderWheelFull();
-    hockeyState = res.hockey; renderHockeyFull();
+    try { wheelState = res.wheel; renderWheelFull(); } catch(e){ console.error('g\'ildirak render xatosi:', e); }
+    try { hockeyState = res.hockey; renderHockeyFull(); } catch(e){ console.error('xokkey render xatosi:', e); }
 
-    taskData = res.tasks;
-    renderTasks();
+    try { taskData = res.tasks; renderTasks(); } catch(e){ console.error('vazifalar render xatosi:', e); }
 
-    dailyState = res.daily || dailyState;
-    renderDailyBonus();
+    try { dailyState = res.daily || dailyState; renderDailyBonus(); } catch(e){ console.error('kunlik bonus render xatosi:', e); }
 
     highlightChip(selectedStake);
   });

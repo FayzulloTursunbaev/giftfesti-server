@@ -332,7 +332,7 @@ io.on('connection', (socket) => {
       if (user.isAdmin) socket.join('admins');
 
       cb({
-        user: { id: userId, balance: user.balance, isAdmin: user.isAdmin },
+        user: { id: userId, name: user.name, balance: user.balance, isAdmin: user.isAdmin },
         wheel: wheelState,
         hockey: hockeyState,
         tasks: tasks.map(t => ({ ...t, done: user.completedTasks.has(t.id) })),

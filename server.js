@@ -285,6 +285,14 @@ function finishHockeyRound() {
 
 setInterval(() => {
   if (hockeyState.state === 'betting') {
+    if (hockeyState.players.length < 2) {
+      // Kamida 2 o'yinchi tikmaguncha vaqt kamaymaydi (baraban bilan bir xil qoida)
+      if (hockeyState.timeLeft !== HOCKEY_BET_SECONDS) {
+        hockeyState.timeLeft = HOCKEY_BET_SECONDS;
+        emitHockeyState();
+      }
+      return;
+    }
     hockeyState.timeLeft -= 1;
     if (hockeyState.timeLeft <= 0) {
       finishHockeyRound();

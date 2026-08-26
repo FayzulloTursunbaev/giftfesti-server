@@ -1640,6 +1640,10 @@ function updateWheelCenter(){
   } else if(wheelState.state === 'spinning'){
     timerEl.style.display = 'none'; hint.style.display = 'none';
     label.style.display = 'block'; label.textContent = 'AYLANMOQDA';
+  } else {
+    // 'waiting' — hali kamida 2 kishi tikmagan
+    label.style.display = 'none'; timerEl.style.display = 'none';
+    hint.style.display = 'block';
   }
 }
 
@@ -1700,7 +1704,7 @@ function highlightChip(v){
   });
 }
 function placeBet(){
-  if(wheelState.state !== 'betting'){ return; }
+  if(wheelState.state === 'spinning'){ return; }
   if(!selectedStake || selectedStake <= 0){ alert("Iltimos, tikish miqdorini kiriting"); return; }
   socket.emit('wheel:bet', selectedStake, (res) => {
     if(!res || res.error){
@@ -1861,10 +1865,15 @@ function updateHockeyTimerUI(){
   const label = document.getElementById('hockeyTimerLabel');
   const val = document.getElementById('hockeyTimerVal');
   if(hockeyState.state === 'betting'){
-    label.textContent = 'Boshlanishiga';
-    const mm = String(Math.floor(hockeyState.timeLeft/60)).padStart(2,'0');
-    const ss = String(hockeyState.timeLeft%60).padStart(2,'0');
-    val.textContent = `${mm}:${ss}`;
+    if(hockeyState.players.length < 2){
+      label.textContent = 'Kamida 2 kishi kerak';
+      val.textContent = '...';
+    } else {
+      label.textContent = 'Boshlanishiga';
+      const mm = String(Math.floor(hockeyState.timeLeft/60)).padStart(2,'0');
+      const ss = String(hockeyState.timeLeft%60).padStart(2,'0');
+      val.textContent = `${mm}:${ss}`;
+    }
   }
 }
 
